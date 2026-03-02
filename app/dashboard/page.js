@@ -1,0 +1,216 @@
+"use client"
+
+// DASHBOARD PAGE — shows a table of all your timesheets
+
+import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Navbar from "@/components/Navbar"
+import StatusBadge from "@/components/StatusBadge"
+import { formatDateRange } from "@/lib/constants"
+
+const ROWS_OPTIONS = [5, 10, 20]
+
+export default function DashboardPage() {
+  const router = useRouter()
+
+  // useSession() reads the NextAuth session (replaces localStorage)
+  // status = "loading" | "authenticated" | "unauthenticated"
+  const { data: session, status } = useSession()
+
+  const [timesheets,   setTimesheets]   = useState([])
+  const [statusFilter, setStatusFilter] = useState("ALL")
+  const [dateFilter,   setDateFilter]   = useState("ALL")
+  const [currentPage,  setCurrentPage]  = useState(1)
+  const [rowsPerPage,  setRowsPerPage]  = useState(5)
+
+  useEffect(() => {
+    // Wait until NextAuth has finished checking the session
+    if (status === "loading") return
+
+    // Not logged in — send to login page
+    if (status === "unauthenticated") {
+      router.push("/login")
+      return
+    }
+
+    // Logged in — load timesheets using id from session (always 1 for mock data)
+    if (status === "authenticated") {
+      loadTimesheets(session.user.id)
+    }
+  }, [status]) // re-run whenever auth status changes
+
+  async function loadTimesheets(userId) {
+    const res  = await fetch(`/api/timesheets?userId=${userId}`)
+    const data = await res.json()
+    setTimesheets(data.timesheets || [])
+  }
+
+  // Filter by status
+  const filtered = timesheets.filter((t) => {
+    if (statusFilter !== "ALL" && t.status.toUpperCase() !== statusFilter) return false
+    return true
+  })
+
+  const totalPages  = Math.ceil(filtered.length / rowsPerPage)
+  const startIndex  = (currentPage - 1) * rowsPerPage
+  const currentRows = filtered.slice(startIndex, startIndex + rowsPerPage)
+
+  function goToPage(page) {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page)
+  }
+
+  function getPageNumbers() {
+    const pages = []
+    const total = totalPages
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i)
+    } else {
+      pages.push(1)
+      if (currentPage > 4) pages.push("...")
+      const start = Math.max(2, currentPage - 1)
+      const end   = Math.min(total - 1, currentPage + 1)
+      for (let i = start; i <= end; i++) pages.push(i)
+      if (currentPage < total - 3) pages.push("...")
+      pages.push(total)
+    }
+    return pages
+  }
+
+  // Show loading spinner while NextAuth is checking the session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    )
+  }
+
+  // Don't render anything while redirecting to login
+  if (status === "unauthenticated") return null
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* session.user.name comes from the NextAuth session (set in auth.js callbacks) */}
+      <Navbar userName={session.user.name} />
+
+      <div className="max-w-5xl mx-auto p-6">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <h1 className="text-2xl font-bold mb-6">Your Timesheets</h1>
+
+          {/* Filter row */}
+          <div className="flex gap-3 mb-6">
+            <select
+              value={dateFilter}
+              onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1) }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+            >
+              <option value="ALL">Date Range</option>
+              <option value="ALL">All dates</option>
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
+            >
+              <option value="ALL">Status</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="INCOMPLETE">Incomplete</option>
+              <option value="MISSING">Missing</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 text-gray-500 text-xs uppercase">
+                <th className="text-left pb-3 font-semibold">Week #</th>
+                <th className="text-left pb-3 font-semibold">Date</th>
+                <th className="text-left pb-3 font-semibold">Status</th>
+                <th className="text-right pb-3 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentRows.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-gray-400">
+                    No timesheets found
+                  </td>
+                </tr>
+              ) : (
+                currentRows.map((sheet) => (
+                  <tr key={sheet.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-4 text-gray-700">{sheet.weekNumber}</td>
+                    <td className="py-4 text-gray-700">{formatDateRange(sheet.startDate, sheet.endDate)}</td>
+                    <td className="py-4"><StatusBadge status={sheet.status} /></td>
+                    <td className="py-4 text-right">
+                      <Link
+                        href={`/timesheet/${sheet.id}`}
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        {sheet.status === "COMPLETED"  && "View"}
+                        {sheet.status === "INCOMPLETE" && "Update"}
+                        {sheet.status === "MISSING"    && "Create"}
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6">
+            <select
+              value={rowsPerPage}
+              onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}
+              className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+            >
+              {ROWS_OPTIONS.map((n) => <option key={n} value={n}>{n} per page</option>)}
+            </select>
+
+            <div className="flex items-center gap-1 text-sm">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              {getPageNumbers().map((page, i) =>
+                page === "..." ? (
+                  <span key={`dots-${i}`} className="px-2 text-gray-400">···</span>
+                ) : (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`w-8 h-8 rounded border text-sm font-medium ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-gray-400 text-sm mt-8">© 2026 tentwenty. All rights reserved.</p>
+      </div>
+    </div>
+  )
+}

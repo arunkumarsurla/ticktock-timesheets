@@ -1,0 +1,11 @@
+{
+  "/login/page": "app/login/page.js",
+  "/register/page": "app/register/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/timesheet/[id]/page": "app/timesheet/[id]/page.js",
+  "/api/register/route": "app/api/register/route.js",
+  "/api/timesheets/route": "app/api/timesheets/route.js",
+  "/api/timesheets/[id]/entries/[entryId]/route": "app/api/timesheets/[id]/entries/[entryId]/route.js",
+  "/api/timesheets/[id]/route": "app/api/timesheets/[id]/route.js"
+}
