@@ -15,7 +15,7 @@ export default function LoginPage() {
     if (status === "authenticated") {
       router.replace("/dashboard");
     }
-  });
+  }, [status, router]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

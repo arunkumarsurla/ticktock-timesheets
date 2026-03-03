@@ -10,11 +10,11 @@ export default function RegisterPage() {
   const router = useRouter();
   const { status } = useSession();
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/dashboard");
-    }
-  });
+useEffect(() => {
+  if (status === "authenticated") {
+    router.replace("/dashboard");
+  }
+}, [status, router]);
 
   const [formData, setFormData] = useState({
     name: "",
