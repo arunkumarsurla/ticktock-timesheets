@@ -14,11 +14,11 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
           <Toaster
-            position="top-left"
+            position="top-center"
             toastOptions={{
-              duration: 3000,
+              duration: 4000,
               style: {
-                fontSize: "14px",
+                fontSize: "16px",
                 borderRadius: "8px",
                 padding: "12px 16px",
               },

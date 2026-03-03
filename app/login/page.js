@@ -1,69 +1,78 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const { status } = useSession();
   const router = useRouter();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // 🔹 Redirect if already logged in
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/dashboard");
     }
   }, [status, router]);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
   function validate() {
     if (!email.trim()) {
-      setError("Email is required");
+      toast.error("Email is required");
       return false;
     }
+
     if (!password.trim()) {
-      setError("Password is required");
+      toast.error("Password is required");
       return false;
     }
+
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      toast.error("Password must be at least 6 characters");
       return false;
     }
+
     return true;
   }
 
   async function handleLogin(e) {
     e.preventDefault();
-    setError("");
 
     if (!validate()) return;
 
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email: email.trim(),
-      password,
-      redirect: false, // ← false = don't auto-redirect, let us handle it
-    });
+    const loadingToast = toast.loading("Signing you in...");
 
-    if (result?.error) {
-      setError("Invalid email or password");
-      toast.error("Invalid Credentials.!");
+    try {
+      const result = await signIn("credentials", {
+        email: email.trim(),
+        password,
+        redirect: false,
+      });
 
+      if (result?.error) {
+        toast.dismiss(loadingToast);
+        toast.error("Invalid email or password");
+        setLoading(false);
+        return;
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success("Login successful 🎉");
+
+      router.push("/dashboard");
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    // Login worked — go to dashboard
-    router.push("/dashboard");
-    toast.success("Login successful 🎉");
   }
 
   return (
@@ -75,22 +84,13 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold mb-8">Welcome back</h1>
 
         <form onSubmit={handleLogin} className="space-y-5">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-3 text-sm">
-              {error}
-            </div>
-          )}
-
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
-              }}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -101,10 +101,7 @@ export default function LoginPage() {
               type="password"
               placeholder="Enter your password."
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError("");
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
