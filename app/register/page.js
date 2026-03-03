@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -69,9 +77,8 @@ export default function RegisterPage() {
       {/* LEFT — Register form */}
 
       <div className="flex flex-col justify-center w-full lg:w-1/2 px-8 md:px-16 lg:px-24">
-                <h1 className="text-5xl font-bold mb-8 text-blue-600">ticktock</h1>
+        <h1 className="text-5xl font-bold mb-8 text-blue-600">ticktock</h1>
 
-      
         <h1 className="text-2xl font-bold mb-8">Create an account</h1>
 
         <form onSubmit={handleRegister} className="space-y-5">
