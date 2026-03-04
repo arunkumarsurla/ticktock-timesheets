@@ -54,23 +54,6 @@ export default function DashboardPage() {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   }
 
-  function getPageNumbers() {
-    const pages = [];
-    const total = totalPages;
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (currentPage > 4) pages.push("...");
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(total - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (currentPage < total - 3) pages.push("...");
-      pages.push(total);
-    }
-    return pages;
-  }
-
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">

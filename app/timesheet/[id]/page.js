@@ -20,28 +20,24 @@ export default function TimesheetPage() {
   const [timesheet,    setTimesheet]   = useState(null)
   const [loading,      setLoading]     = useState(true)
 
-  // Modal state
   const [showModal,    setShowModal]    = useState(false)
-  const [entryToEdit,  setEntryToEdit]  = useState(null)   // null = adding new
-  const [selectedDate, setSelectedDate] = useState("")     // which day was clicked
+  const [entryToEdit,  setEntryToEdit]  = useState(null)   
+  const [selectedDate, setSelectedDate] = useState("")     
 
   const [openMenuId, setOpenMenuId] = useState(null)
 
   useEffect(() => {
-    // Wait for NextAuth to finish checking the session
     if (status === "loading") return
 
-    // Not logged in — redirect to login
     if (status === "unauthenticated") {
       router.push("/login")
       return
     }
 
-    // Logged in — load the timesheet
     if (status === "authenticated") {
       loadTimesheet()
     }
-  }, [status]) // re-runs when auth status changes
+  }, [status])
 
   async function loadTimesheet() {
     setLoading(true)
@@ -51,14 +47,12 @@ export default function TimesheetPage() {
     setLoading(false)
   }
 
-  // Open modal to ADD a new task for a specific day
   function openAddModal(day) {
     setEntryToEdit(null)
     setSelectedDate(day)
     setShowModal(true)
   }
 
-  // Open modal to EDIT an existing task
   function openEditModal(entry) {
     setEntryToEdit(entry)
     setSelectedDate(entry.date)
@@ -66,7 +60,6 @@ export default function TimesheetPage() {
     setShowModal(true)
   }
 
-  // Delete a task after confirmation
   async function handleDelete(entryId) {
     if (!confirm("Are you sure you want to delete this task?")) return
     setOpenMenuId(null)
@@ -74,7 +67,6 @@ export default function TimesheetPage() {
     loadTimesheet()
   }
 
-  // ── Show loading while NextAuth is checking session ────────────
   if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -83,7 +75,6 @@ export default function TimesheetPage() {
     )
   }
 
-  // Don't render while redirecting
   if (status === "unauthenticated") return null
 
   if (!timesheet) {
@@ -199,7 +190,6 @@ export default function TimesheetPage() {
         <p className="text-center text-gray-400 text-sm mt-8">© 2026 tentwenty. All rights reserved.</p>
       </div>
 
-      {/* Add/Edit Modal */}
       {showModal && (
         <EntryModal
           timesheetId={timesheetId}
