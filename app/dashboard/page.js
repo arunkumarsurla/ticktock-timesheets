@@ -1,74 +1,74 @@
-"use client"
+"use client";
 
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import StatusBadge from "@/components/StatusBadge";
+import { formatDateRange } from "@/lib/constants";
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import Navbar from "@/components/Navbar"
-import StatusBadge from "@/components/StatusBadge"
-import { formatDateRange } from "@/lib/constants"
-
-const ROWS_OPTIONS = [5, 10, 20]
+const ROWS_OPTIONS = [5, 10, 20];
 
 export default function DashboardPage() {
-  const router = useRouter()
+  const router = useRouter();
 
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession();
 
-  const [timesheets,   setTimesheets]   = useState([])
-  const [statusFilter, setStatusFilter] = useState("ALL")
-  const [dateFilter,   setDateFilter]   = useState("ALL")
-  const [currentPage,  setCurrentPage]  = useState(1)
-  const [rowsPerPage,  setRowsPerPage]  = useState(5)
+  const [timesheets, setTimesheets] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [dateFilter, setDateFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    if (status === "loading") return
+    if (status === "loading") return;
 
     if (status === "unauthenticated") {
-      router.push("/login")
-      return
+      router.push("/login");
+      return;
     }
 
     if (status === "authenticated") {
-      loadTimesheets(session.user.id)
+      loadTimesheets(session.user.id);
     }
-  }, [status])
+  }, [status]);
 
   async function loadTimesheets(userId) {
-    const res  = await fetch(`/api/timesheets?userId=${userId}`)
-    const data = await res.json()
-    setTimesheets(data.timesheets || [])
+    const res = await fetch(`/api/timesheets?userId=${userId}`);
+    const data = await res.json();
+    setTimesheets(data.timesheets || []);
   }
 
   const filtered = timesheets.filter((t) => {
-    if (statusFilter !== "ALL" && t.status.toUpperCase() !== statusFilter) return false
-    return true
-  })
+    if (statusFilter !== "ALL" && t.status.toUpperCase() !== statusFilter)
+      return false;
+    return true;
+  });
 
-  const totalPages  = Math.ceil(filtered.length / rowsPerPage)
-  const startIndex  = (currentPage - 1) * rowsPerPage
-  const currentRows = filtered.slice(startIndex, startIndex + rowsPerPage)
+  const totalPages = Math.ceil(filtered.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const currentRows = filtered.slice(startIndex, startIndex + rowsPerPage);
 
   function goToPage(page) {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page)
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   }
 
   function getPageNumbers() {
-    const pages = []
-    const total = totalPages
+    const pages = [];
+    const total = totalPages;
     if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i)
+      for (let i = 1; i <= total; i++) pages.push(i);
     } else {
-      pages.push(1)
-      if (currentPage > 4) pages.push("...")
-      const start = Math.max(2, currentPage - 1)
-      const end   = Math.min(total - 1, currentPage + 1)
-      for (let i = start; i <= end; i++) pages.push(i)
-      if (currentPage < total - 3) pages.push("...")
-      pages.push(total)
+      pages.push(1);
+      if (currentPage > 4) pages.push("...");
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(total - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < total - 3) pages.push("...");
+      pages.push(total);
     }
-    return pages
+    return pages;
   }
 
   if (status === "loading") {
@@ -76,10 +76,10 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <p className="text-gray-500">Loading...</p>
       </div>
-    )
+    );
   }
 
-  if (status === "unauthenticated") return null
+  if (status === "unauthenticated") return null;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -92,7 +92,10 @@ export default function DashboardPage() {
           <div className="flex gap-3 mb-6">
             <select
               value={dateFilter}
-              onChange={(e) => { setDateFilter(e.target.value); setCurrentPage(1) }}
+              onChange={(e) => {
+                setDateFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
             >
               <option value="ALL">Date Range</option>
@@ -101,7 +104,10 @@ export default function DashboardPage() {
 
             <select
               value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
             >
               <option value="ALL">Status</option>
@@ -129,18 +135,25 @@ export default function DashboardPage() {
                 </tr>
               ) : (
                 currentRows.map((sheet) => (
-                  <tr key={sheet.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr
+                    key={sheet.id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
                     <td className="py-4 text-gray-700">{sheet.weekNumber}</td>
-                    <td className="py-4 text-gray-700">{formatDateRange(sheet.startDate, sheet.endDate)}</td>
-                    <td className="py-4"><StatusBadge status={sheet.status} /></td>
+                    <td className="py-4 text-gray-700">
+                      {formatDateRange(sheet.startDate, sheet.endDate)}
+                    </td>
+                    <td className="py-4">
+                      <StatusBadge status={sheet.status} />
+                    </td>
                     <td className="py-4 text-right">
                       <Link
                         href={`/timesheet/${sheet.id}`}
                         className="text-blue-600 hover:underline font-medium"
                       >
-                        {sheet.status === "COMPLETED"  && "View"}
+                        {sheet.status === "COMPLETED" && "View"}
                         {sheet.status === "INCOMPLETE" && "Update"}
-                        {sheet.status === "MISSING"    && "Create"}
+                        {sheet.status === "MISSING" && "Create"}
                       </Link>
                     </td>
                   </tr>
@@ -152,52 +165,51 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mt-6">
             <select
               value={rowsPerPage}
-              onChange={(e) => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1) }}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
               className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
             >
-              {ROWS_OPTIONS.map((n) => <option key={n} value={n}>{n} per page</option>)}
+              {ROWS_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n} per page
+                </option>
+              ))}
             </select>
 
             <div className="flex items-center gap-1 text-sm">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-              >
-                Previous
-              </button>
-
-              {getPageNumbers().map((page, i) =>
-                page === "..." ? (
-                  <span key={`dots-${i}`} className="px-2 text-gray-400">···</span>
-                ) : (
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center gap-3 text-sm">
                   <button
-                    key={page}
-                    onClick={() => goToPage(page)}
-                    className={`w-8 h-8 rounded border text-sm font-medium ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                    }`}
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
                   >
-                    {page}
+                    Previous
                   </button>
-                )
-              )}
 
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-              >
-                Next
-              </button>
+                  <span className="text-gray-500">
+                    Page {currentPage} of {totalPages || 1}
+                  </span>
+
+                  <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    className="px-4 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <p className="text-center text-gray-400 text-sm mt-8">© 2026 tentwenty. All rights reserved.</p>
+        <p className="text-center text-gray-400 text-sm mt-8">
+          © 2026 tentwenty. All rights reserved.
+        </p>
       </div>
     </div>
-  )
+  );
 }
