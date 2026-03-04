@@ -1,5 +1,4 @@
-// GET /api/timesheets?userId=1   — list all timesheets for a user
-// POST /api/timesheets           — create a new timesheet
+
 import { getTimesheetsByUser, createTimesheet } from "@/lib/mockData"
 import { NextResponse } from "next/server"
 

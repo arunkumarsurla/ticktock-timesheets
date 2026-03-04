@@ -1,8 +1,6 @@
 "use client"
 
-// TIMESHEET DETAIL PAGE
-// Shows all tasks for one week, grouped by day (Mon to Fri)
-// Add, Edit, Delete tasks here
+
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
@@ -17,7 +15,6 @@ export default function TimesheetPage() {
   const params      = useParams()
   const timesheetId = params.id
 
-  // useSession replaces localStorage — gives us the logged-in user from NextAuth
   const { data: session, status } = useSession()
 
   const [timesheet,    setTimesheet]   = useState(null)
@@ -28,7 +25,6 @@ export default function TimesheetPage() {
   const [entryToEdit,  setEntryToEdit]  = useState(null)   // null = adding new
   const [selectedDate, setSelectedDate] = useState("")     // which day was clicked
 
-  // Which "···" dropdown is open (stores entry id)
   const [openMenuId, setOpenMenuId] = useState(null)
 
   useEffect(() => {
@@ -98,11 +94,9 @@ export default function TimesheetPage() {
     )
   }
 
-  // ── Compute display values ────────────────────────────────────
 
   const weekDays = getWeekDays(timesheet.startDate, timesheet.endDate)
 
-  // Group entries by date label: { "Jan 22": [entry, entry], "Jan 23": [entry] }
   const entriesByDay = {}
   timesheet.entries.forEach((entry) => {
     const day = entry.date || "Unknown"
@@ -116,7 +110,6 @@ export default function TimesheetPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* session.user.name comes from NextAuth — set in lib/auth.js */}
       <Navbar userName={session.user.name} />
 
       <div className="max-w-3xl mx-auto p-6">
@@ -127,7 +120,6 @@ export default function TimesheetPage() {
 
         <div className="bg-white rounded-xl shadow-sm p-6">
 
-          {/* Title + hours counter */}
           <div className="flex items-center justify-between mb-1">
             <h1 className="text-xl font-bold">This week&apos;s timesheet</h1>
             <span className="text-sm text-gray-600 font-medium">{totalHours}/{targetHours} hrs</span>
@@ -137,7 +129,6 @@ export default function TimesheetPage() {
             {formatDateRange(timesheet.startDate, timesheet.endDate)}
           </p>
 
-          {/* Progress bar */}
           <div className="flex items-center gap-3 mb-8">
             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
@@ -148,7 +139,6 @@ export default function TimesheetPage() {
             <span className="text-xs text-gray-500 w-10 text-right">{progress}%</span>
           </div>
 
-          {/* Every day of the week — even empty ones */}
           {weekDays.map((day) => {
             const dayEntries = entriesByDay[day] || []
 
@@ -167,7 +157,6 @@ export default function TimesheetPage() {
                       {entry.project}
                     </span>
 
-                    {/* ··· dropdown menu */}
                     <div className="relative">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === entry.id ? null : entry.id)}
@@ -196,7 +185,6 @@ export default function TimesheetPage() {
                   </div>
                 ))}
 
-                {/* Add task button — passes this specific day to the modal */}
                 <button
                   onClick={() => openAddModal(day)}
                   className="w-full border border-dashed border-blue-300 text-blue-500 text-sm py-2.5 rounded-lg hover:bg-blue-50 transition mt-1"

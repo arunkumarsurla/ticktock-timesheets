@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Redirect if already logged in
   useEffect(() => {
     if (status === "authenticated") {
       router.replace("/dashboard");

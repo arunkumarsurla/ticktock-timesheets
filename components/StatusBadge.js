@@ -1,7 +1,5 @@
-// STATUS BADGE — shows a colored pill based on timesheet status
 
 export default function StatusBadge({ status }) {
-  // Normalize to uppercase so "completed" and "COMPLETED" both work
   const normalized = (status || "").toUpperCase()
 
   const colors = {

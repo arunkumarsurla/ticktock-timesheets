@@ -1,7 +1,6 @@
 "use client";
 
-// NAVBAR — top bar shown on every logged-in page
-// Uses next-auth signOut with proper toast handling
+
 
 import { signOut } from "next-auth/react";
 import Link from "next/link";
@@ -26,7 +25,6 @@ export default function Navbar({ userName }) {
       toast.dismiss(loadingToast);
       toast.success("Logged out successfully 👋");
 
-      // Manual redirect after toast
       window.location.href = "/login";
     } catch (error) {
       toast.dismiss(loadingToast);
@@ -37,7 +35,6 @@ export default function Navbar({ userName }) {
 
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-      {/* Left — logo + page label */}
       <div className="flex items-center gap-8">
         <Link href="/dashboard" className="text-lg font-bold text-gray-900">
           ticktock
@@ -45,7 +42,6 @@ export default function Navbar({ userName }) {
         <span className="text-gray-500 text-sm">Timesheets</span>
       </div>
 
-      {/* Right — user name + logout */}
       <div className="flex items-center gap-4">
         <span className="text-sm font-medium text-gray-700">
           {userName}

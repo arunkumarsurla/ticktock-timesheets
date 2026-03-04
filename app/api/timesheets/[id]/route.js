@@ -1,4 +1,3 @@
-// GET /api/timesheets/[id]  — get one timesheet by id
 import { getTimesheetById } from "@/lib/mockData"
 import { NextResponse } from "next/server"
 

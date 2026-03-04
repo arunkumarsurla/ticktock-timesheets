@@ -1,5 +1,4 @@
-// PUT    /api/timesheets/[id]/entries/[entryId]  — update an entry
-// DELETE /api/timesheets/[id]/entries/[entryId]  — delete an entry
+
 import { updateEntry, deleteEntry } from "@/lib/mockData"
 import { NextResponse } from "next/server"
 
@@ -7,7 +6,6 @@ export async function PUT(request, { params }) {
   const body = await request.json()
   const { date, project, workType, description, hours } = body
 
-  // Validate all required fields
   if (!date)               return NextResponse.json({ error: "Date is required" },        { status: 400 })
   if (!project)            return NextResponse.json({ error: "Project is required" },     { status: 400 })
   if (!workType)           return NextResponse.json({ error: "Work type is required" },   { status: 400 })

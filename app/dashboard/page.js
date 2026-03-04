@@ -1,6 +1,5 @@
 "use client"
 
-// DASHBOARD PAGE — shows a table of all your timesheets
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
@@ -15,8 +14,6 @@ const ROWS_OPTIONS = [5, 10, 20]
 export default function DashboardPage() {
   const router = useRouter()
 
-  // useSession() reads the NextAuth session (replaces localStorage)
-  // status = "loading" | "authenticated" | "unauthenticated"
   const { data: session, status } = useSession()
 
   const [timesheets,   setTimesheets]   = useState([])
@@ -26,20 +23,17 @@ export default function DashboardPage() {
   const [rowsPerPage,  setRowsPerPage]  = useState(5)
 
   useEffect(() => {
-    // Wait until NextAuth has finished checking the session
     if (status === "loading") return
 
-    // Not logged in — send to login page
     if (status === "unauthenticated") {
       router.push("/login")
       return
     }
 
-    // Logged in — load timesheets using id from session (always 1 for mock data)
     if (status === "authenticated") {
       loadTimesheets(session.user.id)
     }
-  }, [status]) // re-run whenever auth status changes
+  }, [status])
 
   async function loadTimesheets(userId) {
     const res  = await fetch(`/api/timesheets?userId=${userId}`)
@@ -47,7 +41,6 @@ export default function DashboardPage() {
     setTimesheets(data.timesheets || [])
   }
 
-  // Filter by status
   const filtered = timesheets.filter((t) => {
     if (statusFilter !== "ALL" && t.status.toUpperCase() !== statusFilter) return false
     return true
@@ -78,7 +71,6 @@ export default function DashboardPage() {
     return pages
   }
 
-  // Show loading spinner while NextAuth is checking the session
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -87,19 +79,16 @@ export default function DashboardPage() {
     )
   }
 
-  // Don't render anything while redirecting to login
   if (status === "unauthenticated") return null
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* session.user.name comes from the NextAuth session (set in auth.js callbacks) */}
       <Navbar userName={session.user.name} />
 
       <div className="max-w-5xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h1 className="text-2xl font-bold mb-6">Your Timesheets</h1>
 
-          {/* Filter row */}
           <div className="flex gap-3 mb-6">
             <select
               value={dateFilter}
@@ -122,7 +111,6 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          {/* Table */}
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 text-gray-500 text-xs uppercase">
@@ -161,7 +149,6 @@ export default function DashboardPage() {
             </tbody>
           </table>
 
-          {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
             <select
               value={rowsPerPage}
