@@ -1,3 +1,239 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-root {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+}
+
+/* ── sliding blue panel ── */
+.blue-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: #2563eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 5%;
+  color: #fff;
+  z-index: 10;
+  transition: left 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+  will-change: left;
+}
+.blue-panel.login-mode {
+  left: 50%;
+}
+.blue-panel.register-mode {
+  left: 0%;
+}
+
+.blue-panel h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+}
+.blue-panel p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 340px;
+}
+
+/* ── form panel ── */
+.form-area {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 5%;
+  transition: margin-left 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+  will-change: margin-left;
+  position: relative;
+  z-index: 5;
+  min-height: 100vh;
+}
+.form-area.login-mode {
+  margin-left: 0%;
+}
+.form-area.register-mode {
+  margin-left: 50%;
+}
+
+/* panel fade/slide content */
+.panel-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 12%;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.panel-content.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+}
+.panel-content.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* ── logo ── */
+.logo {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #2563eb;
+  letter-spacing: -0.04em;
+  margin-bottom: 2rem;
+}
+
+/* ── form heading ── */
+.form-heading {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.8rem;
+  letter-spacing: -0.02em;
+}
+
+/* ── inputs ── */
+.field {
+  margin-bottom: 1.1rem;
+}
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.field input {
+  width: 100%;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #0f172a;
+  background: #f8fafc;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+  outline: none;
+}
+.field input:focus {
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* ── remember me ── */
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.3rem;
+}
+.remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+}
+.remember label {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+/* ── submit button ── */
+.submit-btn {
+  width: 100%;
+  background: #2563eb;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s,
+    box-shadow 0.2s;
+  letter-spacing: 0.01em;
+}
+.submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── switch link ── */
+.switch-link {
+  margin-top: 1.4rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+.switch-link button {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+.switch-link button:hover {
+  color: #1d4ed8;
+}
+
+/* ── responsive ── */
+@media (max-width: 768px) {
+  .blue-panel {
+    display: none;
+  }
+  .form-area {
+    width: 100%;
+    margin-left: 0 !important;
+  }
+  .panel-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .panel-content.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
